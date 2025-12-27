@@ -1,26 +1,346 @@
 @import "tailwindcss";
 
+/* === THEME VARIABLES === */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --warm-bg: #FDFCF8;
+  --warm-surface: #F5F2EA;
+  --warm-border: #E6E2D8;
+  --warm-text: #4A4741;
+  --warm-text-light: #78756E;
+  --accent-primary: #C47F64;
+  --accent-secondary: #8DA399;
+  --accent-highlight: #D6CFC2;
+  --white: #FFFFFF;
+  --success: #4CAF50;
+  --error: #E57373;
+  --warning: #FFB74D;
 }
 
+/* === TAILWIND THEME EXTENSION === */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-warm-bg: var(--warm-bg);
+  --color-warm-surface: var(--warm-surface);
+  --color-warm-border: var(--warm-border);
+  --color-warm-text: var(--warm-text);
+  --color-warm-text-light: var(--warm-text-light);
+  --color-accent: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-highlight: var(--accent-highlight);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* === BASE STYLES === */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--warm-bg);
+  color: var(--warm-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === TYPOGRAPHY === */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+}
+
+/* === SELECTION === */
+::selection {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+/* === SCROLLBAR === */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--warm-surface);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--warm-border);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--warm-text-light);
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* === ANIMATIONS === */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(196, 127, 100, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(196, 127, 100, 0);
+  }
+}
+
+@keyframes strum-down {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes beat {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-beat {
+  animation: beat 0.3s ease-in-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+@keyframes strum-up {
+  0% {
+    transform: translateY(10px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(10px);
+  }
+}
+
+.animate-strum-down {
+  animation: strum-down 0.3s ease-out;
+}
+
+.animate-strum-up {
+  animation: strum-up 0.3s ease-out;
+}
+
+/* === FRETBOARD STYLES === */
+.fret-marker {
+  fill: var(--warm-border);
+  opacity: 0.6;
+}
+
+.string-line {
+  stroke: var(--warm-text);
+  transition: stroke 0.2s ease;
+}
+
+.string-line:hover {
+  stroke: var(--accent-primary);
+  cursor: pointer;
+}
+
+.finger-dot {
+  fill: var(--accent-primary);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.2s ease;
+}
+
+.finger-dot:hover {
+  transform: scale(1.1);
+}
+
+/* === BUTTON HOVER EFFECTS === */
+.btn-primary {
+  background-color: var(--warm-text);
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(196, 127, 100, 0.3);
+}
+
+.btn-accent {
+  background-color: var(--accent-primary);
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.btn-accent:hover {
+  background-color: #B06E53;
+  transform: translateY(-1px);
+}
+
+/* === CARD STYLES === */
+.card {
+  background-color: var(--white);
+  border: 1px solid var(--warm-border);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 30px rgba(74, 71, 65, 0.08);
+  transform: translateY(-2px);
+}
+
+/* === PROGRESS BAR === */
+.progress-bar {
+  background-color: var(--warm-border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background-color: var(--accent-secondary);
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+
+/* === CHORD CHIP === */
+.chord-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  background-color: var(--warm-surface);
+  color: var(--warm-text-light);
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+/* === NAV ACTIVE STATE === */
+.nav-btn-active {
+  background-color: var(--accent-primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(196, 127, 100, 0.3);
+}
+
+/* === METRONOME INDICATOR === */
+.metronome-beat {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--warm-border);
+  transition: all 0.1s ease;
+}
+
+.metronome-beat.active {
+  background-color: var(--accent-primary);
+  transform: scale(1.2);
+}
+
+.metronome-beat.downbeat {
+  background-color: var(--accent-secondary);
+}
+
+/* === PITCH FEEDBACK === */
+.pitch-correct {
+  color: var(--success);
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.pitch-incorrect {
+  color: var(--error);
+  background-color: rgba(229, 115, 115, 0.1);
+}
+
+.pitch-timing {
+  color: var(--warning);
+  background-color: rgba(255, 183, 77, 0.1);
+}
+
+/* === SKILL TREE NODE === */
+.skill-node {
+  border-radius: 12px;
+  border: 2px solid var(--warm-border);
+  background-color: var(--white);
+  transition: all 0.3s ease;
+}
+
+.skill-node.unlocked {
+  border-color: var(--accent-secondary);
+}
+
+.skill-node.completed {
+  border-color: var(--success);
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.skill-node.locked {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+}
+
+/* === RESPONSIVE HELPERS === */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-mobile-only {
+    display: none;
+  }
 }
