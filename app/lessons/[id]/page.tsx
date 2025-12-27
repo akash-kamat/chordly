@@ -50,9 +50,13 @@ export default function LessonPage() {
         newCompleted[currentStepIndex] = true;
         setStepCompleted(newCompleted);
 
-        // Add chord to learned if this is a chord lesson
-        if (currentStep.chord && !progress.chordsLearned.includes(currentStep.chord)) {
-            addChordLearned(currentStep.chord);
+        // Add chords to learned if this is a chord lesson
+        if (currentStep.chords) {
+            currentStep.chords.forEach(chord => {
+                if (!progress.chordsLearned.includes(chord)) {
+                    addChordLearned(chord);
+                }
+            });
         }
     };
 
@@ -74,10 +78,11 @@ export default function LessonPage() {
     };
 
     const handlePlayDemo = () => {
-        if (currentStep.chord) {
-            const chordData = CHORDS[currentStep.chord];
-            if (chordData) {
-                strumChord(chordData.positions, audioSettings);
+        const firstChord = currentStep.chords?.[0];
+        if (firstChord) {
+            const chord = CHORDS[firstChord];
+            if (chord) {
+                strumChord(chord.positions, audioSettings);
             }
         }
     };
@@ -99,7 +104,8 @@ export default function LessonPage() {
     };
 
     const stepStyle = getStepTypeStyle(currentStep.type);
-    const chordData = currentStep.chord ? CHORDS[currentStep.chord] : null;
+    const firstChord = currentStep.chords?.[0];
+    const chordData = firstChord ? CHORDS[firstChord] : null;
 
     return (
         <div className="min-h-screen py-8 px-6" style={{ backgroundColor: THEME.bg }}>
@@ -146,12 +152,11 @@ export default function LessonPage() {
                             <button
                                 key={i}
                                 onClick={() => setCurrentStepIndex(i)}
-                                className={`h-2 flex-1 rounded-full transition-all ${i === currentStepIndex ? 'ring-2 ring-offset-2' : ''
+                                className={`h-2 flex-1 rounded-full transition-all ${i === currentStepIndex ? 'ring-2 ring-offset-2 ring-[#C47F64]' : ''
                                     }`}
                                 style={{
                                     backgroundColor: stepCompleted[i] ? THEME.accentSec :
                                         i === currentStepIndex ? THEME.accent : THEME.border,
-                                    ringColor: THEME.accent
                                 }}
                             />
                         ))}
@@ -199,7 +204,7 @@ export default function LessonPage() {
 
                             <div className="space-y-4">
                                 <div>
-                                    <h3 className="font-bold mb-2">Chord: {currentStep.chord}</h3>
+                                    <h3 className="font-bold mb-2">Chord: {firstChord}</h3>
                                     <p className="text-sm" style={{ color: THEME.textLight }}>
                                         {chordData.mood}
                                     </p>

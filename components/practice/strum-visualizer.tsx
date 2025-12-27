@@ -69,12 +69,11 @@ export function StrumVisualizer({ bpm, isPlaying, patternId = 'basic-4' }: Strum
                         >
                             {/* Stroke indicator */}
                             <div
-                                className={`w-10 h-16 rounded-lg flex items-center justify-center mb-2 transition-all ${isActive ? 'ring-2 ring-offset-2' : ''
+                                className={`w-10 h-16 rounded-lg flex items-center justify-center mb-2 transition-all ${isActive ? 'ring-2 ring-offset-2 ring-[#C47F64]' : ''
                                     }`}
                                 style={{
                                     backgroundColor: stroke === '-' ? THEME.surface :
                                         stroke === 'D' ? THEME.accent : THEME.accentSec,
-                                    ringColor: THEME.accent,
                                 }}
                             >
                                 {stroke === 'D' && (
