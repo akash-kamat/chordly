@@ -17,6 +17,88 @@ interface FretboardProps {
     fretCount?: number;
 }
 
+import { motion, useAnimation } from 'framer-motion';
+
+interface GuitarStringProps {
+    x: number;
+    y1: number;
+    y2: number;
+    strokeWidth: number;
+    color: string;
+    index: number;
+    isDragging: boolean;
+    onStrum: () => void;
+}
+
+const GuitarString = ({ x, y1, y2, strokeWidth, color, index, isDragging, onStrum }: GuitarStringProps) => {
+    const controls = useAnimation();
+
+    const triggerPluck = async () => {
+        // Random direction for variety
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        const amplitude = 6;
+
+        // Initial displacement (pluck)
+        // We can't easily animate the "d" attribute with spring physics on a sub-value directly via simple variants 
+        // without a custom motion value, but animating the path definition string works reasonably well in newer Framer Motion 
+        // or we can use a simpler transform approach. 
+        // Actually, animating SVG path `d` is supported if vertex counts match.
+        // A straight line `M x y1 Q x centerY x y2` (control point at x) matches `M x y1 Q x+amp centerY x y2`.
+
+        const centerY = (y1 + y2) / 2;
+
+        // Sequence: Snap to displaced state, then spring back to center
+        // We set the "displaced" shape first
+        await controls.start({
+            d: `M ${x} ${y1} Q ${x + (amplitude * direction)} ${centerY} ${x} ${y2}`,
+            transition: { duration: 0.05 }
+        });
+
+        // Then spring back to straight
+        controls.start({
+            d: `M ${x} ${y1} Q ${x} ${centerY} ${x} ${y2}`,
+            transition: {
+                type: "spring",
+                stiffness: 800,
+                damping: 15,
+                mass: 0.5
+            }
+        });
+
+        onStrum();
+    };
+
+    return (
+        <g>
+            {/* The Vibrating String */}
+            <motion.path
+                d={`M ${x} ${y1} Q ${x} ${(y1 + y2) / 2} ${x} ${y2}`}
+                stroke={color}
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                fill="transparent"
+                animate={controls}
+            />
+
+            {/* Invisible Hit Target */}
+            <rect
+                x={x - 15}
+                y={y1}
+                width={30}
+                height={y2 - y1}
+                fill="transparent"
+                style={{ cursor: 'pointer' }}
+                onMouseDown={() => {
+                    triggerPluck();
+                }}
+                onMouseEnter={() => {
+                    if (isDragging) triggerPluck();
+                }}
+            />
+        </g>
+    );
+};
+
 export function Fretboard({
     positions,
     fingers,
@@ -149,31 +231,17 @@ export function Fretboard({
 
                 {/* Strings and Hit Targets */}
                 {Array.from({ length: strings }).map((_, i) => (
-                    <g key={`str-${i}`}>
-                        {/* Visible String */}
-                        <line
-                            x1={xOffset + i * stringSpacing}
-                            y1={28}
-                            x2={xOffset + i * stringSpacing}
-                            y2={height - 10}
-                            stroke={THEME.text}
-                            strokeWidth={1 + (leftHanded ? i : 5 - i) * 0.5}
-                            opacity={0.8}
-                            className="transition-opacity pointer-events-none"
-                        />
-
-                        {/* Invisible Hit Target for Interaction */}
-                        <rect
-                            x={(xOffset + i * stringSpacing) - 10}
-                            y={28}
-                            width={20}
-                            height={height - 38}
-                            fill="transparent"
-                            style={{ cursor: 'pointer' }}
-                            onMouseDown={() => handleStringInteraction(i)}
-                            onMouseEnter={() => matchMedia('(hover: hover)').matches && isDragging && handleStringInteraction(i)}
-                        />
-                    </g>
+                    <GuitarString
+                        key={`str-${i}`}
+                        index={i}
+                        x={xOffset + i * stringSpacing}
+                        y1={28}
+                        y2={height - 10}
+                        strokeWidth={1 + (leftHanded ? i : 5 - i) * 0.5}
+                        color={THEME.text}
+                        isDragging={isDragging}
+                        onStrum={() => handleStringInteraction(i)}
+                    />
                 ))}
 
                 {/* Barre chord indicator */}
