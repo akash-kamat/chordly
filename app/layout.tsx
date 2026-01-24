@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { SkipToContent, AccessibilityPanel } from "@/components/accessibility/a11y";
+import { ClientLayout } from "@/components/ui/client-layout";
 
 const playfair = Playfair_Display({
   variable: "--font-serif",
@@ -34,7 +35,7 @@ export default function RootLayout({
       >
         <SkipToContent />
         <main id="main-content">
-          {children}
+          <ClientLayout>{children}</ClientLayout>
         </main>
         <AccessibilityPanel />
       </body>

@@ -3,6 +3,7 @@
 import { useRef, useCallback } from 'react';
 import Soundfont, { InstrumentName, Player } from 'soundfont-player';
 import { TUNING, AudioSettings } from '@/types';
+import { useAppStore } from '@/store/app-store';
 
 // Note names for MIDI conversion
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -29,37 +30,49 @@ export function useAudio() {
     const instrumentRef = useRef<Player | null>(null);
     const isLoadingRef = useRef<boolean>(false);
 
+    // Track currently loaded instrument to detect changes
+    const loadedInstrumentRef = useRef<InstrumentName | null>(null);
+    const { audioSettings } = useAppStore();
+
     // Initialize audio context and load soundfont
     const initAudio = useCallback(async () => {
-        if (audioCtxRef.current && instrumentRef.current) {
-            if (audioCtxRef.current.state === 'suspended') {
-                await audioCtxRef.current.resume();
-            }
-            return;
-        }
-
-        if (isLoadingRef.current) return;
-        isLoadingRef.current = true;
-
-        try {
+        if (!audioCtxRef.current) {
             const AudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
             audioCtxRef.current = new AudioContext();
-
-            // Load acoustic guitar soundfont
-            instrumentRef.current = await Soundfont.instrument(
-                audioCtxRef.current,
-                'acoustic_guitar_nylon' as InstrumentName,
-                {
-                    soundfont: 'MusyngKite',
-                    gain: 2,
-                }
-            );
-        } catch (error) {
-            console.error('Failed to load soundfont:', error);
-        } finally {
-            isLoadingRef.current = false;
         }
-    }, []);
+
+        if (audioCtxRef.current.state === 'suspended') {
+            await audioCtxRef.current.resume();
+        }
+
+        // Check if we need to load/reload instrument
+        if (
+            !instrumentRef.current ||
+            loadedInstrumentRef.current !== audioSettings.instrument
+        ) {
+            if (isLoadingRef.current) return;
+            isLoadingRef.current = true;
+
+            try {
+                // Load new instrument
+                const newInstrument = await Soundfont.instrument(
+                    audioCtxRef.current,
+                    audioSettings.instrument as InstrumentName,
+                    {
+                        soundfont: 'MusyngKite',
+                        gain: 2,
+                    }
+                );
+
+                instrumentRef.current = newInstrument;
+                loadedInstrumentRef.current = audioSettings.instrument as InstrumentName;
+            } catch (error) {
+                console.error('Failed to load soundfont:', error);
+            } finally {
+                isLoadingRef.current = false;
+            }
+        }
+    }, [audioSettings.instrument]);
 
     // Play a single string at a specific fret
     const playString = useCallback(async (

@@ -2,15 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Guitar, BookOpen, Music, Mic, Rocket } from 'lucide-react';
+import { Guitar, BookOpen, Music, Mic, Rocket, Settings as SettingsIcon, User } from 'lucide-react';
 import { NavButton } from '@/components/ui/nav-button';
 import { THEME } from '@/types';
+import { useAppStore } from '@/store/app-store';
 
 const SECTIONS = ['fundamentals', 'quickstart', 'theory', 'workshop'];
 
 export function Navbar() {
     const [activeSection, setActiveSection] = useState('fundamentals');
     const [scrollProgress, setScrollProgress] = useState(0);
+    const { user, profile } = useAppStore();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -112,6 +114,43 @@ export function Navbar() {
                                 <span className="hidden sm:inline">Songs</span>
                             </Link>
                         </div>
+                    </div>
+
+                    {/* Right Side: Auth & Settings */}
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('open-settings'))}
+                            className="p-2 rounded-lg hover:bg-black/5 transition-colors"
+                            title="Settings"
+                        >
+                            <SettingsIcon size={20} className="text-gray-600" />
+                        </button>
+
+                        {user ? (
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('open-settings'))}
+                                className="flex items-center gap-2 px-3 py-2 rounded-xl transition-colors border shadow-sm"
+                                style={{ backgroundColor: 'white', borderColor: THEME.border }}
+                            >
+                                {profile?.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full" />
+                                ) : (
+                                    <div className="p-1 rounded-full bg-gray-100">
+                                        <User size={14} className="text-gray-600" />
+                                    </div>
+                                )}
+                                <span className="text-sm font-medium hidden sm:inline">{profile?.full_name?.split(' ')[0] || 'Account'}</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('open-auth'))}
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm text-white hover:opacity-90"
+                                style={{ backgroundColor: THEME.accent }}
+                            >
+                                <User size={18} />
+                                <span className="hidden sm:inline">Sign In</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </nav>

@@ -85,6 +85,7 @@ export interface AudioSettings {
     tone: number; // 0-1 (warm to bright)
     sustain: number; // seconds
     strumSpeed: number; // seconds between strings
+    instrument: 'acoustic_guitar_nylon' | 'acoustic_guitar_steel' | 'electric_guitar_clean' | 'electric_guitar_jazz';
 }
 
 export interface AppSettings {
@@ -119,3 +120,13 @@ export const THEME = {
     error: '#E57373',
     warning: '#FFB74D',
 } as const;
+
+export interface UserProfile {
+    id: string;
+    username?: string;
+    full_name?: string;
+    avatar_url?: string;
+    website?: string;
+    updated_at?: string;
+}
+
