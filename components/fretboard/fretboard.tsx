@@ -15,89 +15,10 @@ interface FretboardProps {
     showHints?: boolean;
     leftHanded?: boolean;
     fretCount?: number;
+    strumTrigger?: number; // Timestamp to trigger full strum
 }
 
-import { motion, useAnimation } from 'framer-motion';
-
-interface GuitarStringProps {
-    x: number;
-    y1: number;
-    y2: number;
-    strokeWidth: number;
-    color: string;
-    index: number;
-    isDragging: boolean;
-    onStrum: () => void;
-}
-
-const GuitarString = ({ x, y1, y2, strokeWidth, color, index, isDragging, onStrum }: GuitarStringProps) => {
-    const controls = useAnimation();
-
-    const triggerPluck = async () => {
-        // Random direction for variety
-        const direction = Math.random() > 0.5 ? 1 : -1;
-        const amplitude = 6;
-
-        // Initial displacement (pluck)
-        // We can't easily animate the "d" attribute with spring physics on a sub-value directly via simple variants 
-        // without a custom motion value, but animating the path definition string works reasonably well in newer Framer Motion 
-        // or we can use a simpler transform approach. 
-        // Actually, animating SVG path `d` is supported if vertex counts match.
-        // A straight line `M x y1 Q x centerY x y2` (control point at x) matches `M x y1 Q x+amp centerY x y2`.
-
-        const centerY = (y1 + y2) / 2;
-
-        // Sequence: Snap to displaced state, then spring back to center
-        // We set the "displaced" shape first
-        await controls.start({
-            d: `M ${x} ${y1} Q ${x + (amplitude * direction)} ${centerY} ${x} ${y2}`,
-            transition: { duration: 0.05 }
-        });
-
-        // Then spring back to straight
-        controls.start({
-            d: `M ${x} ${y1} Q ${x} ${centerY} ${x} ${y2}`,
-            transition: {
-                type: "spring",
-                stiffness: 800,
-                damping: 15,
-                mass: 0.5
-            }
-        });
-
-        onStrum();
-    };
-
-    return (
-        <g>
-            {/* The Vibrating String */}
-            <motion.path
-                d={`M ${x} ${y1} Q ${x} ${(y1 + y2) / 2} ${x} ${y2}`}
-                stroke={color}
-                strokeWidth={strokeWidth}
-                strokeLinecap="round"
-                fill="transparent"
-                animate={controls}
-            />
-
-            {/* Invisible Hit Target */}
-            <rect
-                x={x - 15}
-                y={y1}
-                width={30}
-                height={y2 - y1}
-                fill="transparent"
-                style={{ cursor: 'pointer' }}
-                onMouseDown={() => {
-                    triggerPluck();
-                }}
-                onMouseEnter={() => {
-                    if (isDragging) triggerPluck();
-                }}
-            />
-        </g>
-    );
-};
+import { GuitarString } from '@/components/ui/guitar-string';
 
 export function Fretboard({
     positions,
@@ -107,9 +28,36 @@ export function Fretboard({
     showHints = true,
     leftHanded = false,
     fretCount = 5,
+    strumTrigger
 }: FretboardProps) {
     const strings = 6;
     const width = 280;
+
+    // Staggered strumming logic
+    const [stringTriggers, setStringTriggers] = React.useState<number[]>(new Array(6).fill(0));
+
+    React.useEffect(() => {
+        if (strumTrigger) {
+            // Loop through visual strings (0 = left, 5 = right)
+            Array.from({ length: 6 }).forEach((_, i) => {
+                // Determine which chord position corresponds to this visual string
+                const posIndex = leftHanded ? 5 - i : i;
+
+                // Only strum if string is not muted (-1)
+                if (positions[posIndex] !== -1) {
+                    setTimeout(() => {
+                        setStringTriggers(prev => {
+                            const next = [...prev];
+                            next[i] = Date.now();
+                            return next;
+                        });
+                    }, i * 50); // 50ms delay between strings
+                }
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [strumTrigger, positions.join(','), leftHanded]);
+
     const height = 60 + fretCount * 56; // Dynamic height based on fret count
 
     // Centering Logic
@@ -241,6 +189,7 @@ export function Fretboard({
                         color={THEME.text}
                         isDragging={isDragging}
                         onStrum={() => handleStringInteraction(i)}
+                        lastStrummedAt={stringTriggers[i]}
                     />
                 ))}
 

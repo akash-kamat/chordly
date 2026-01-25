@@ -12,6 +12,7 @@ export function WorkshopSection() {
     const [currentChord, setCurrentChord] = useState('C Major');
     const audioSettings = useAppStore((state) => state.audioSettings);
     const { strumChord, playString } = useAudio();
+    const [strumTrigger, setStrumTrigger] = useState(0);
 
     const chordData = CHORDS[currentChord] || CHORDS['C Major'];
 
@@ -21,11 +22,13 @@ export function WorkshopSection() {
         const chord = CHORDS[chordName];
         if (chord) {
             strumChord(chord.positions, audioSettings);
+            setStrumTrigger(Date.now());
         }
     };
 
     const handleStrum = () => {
         strumChord(chordData.positions, audioSettings);
+        setStrumTrigger(Date.now());
     };
 
     const handleStringClick = (stringIndex: number, fret: number) => {
@@ -83,6 +86,8 @@ export function WorkshopSection() {
                         positions={chordData.positions}
                         fingers={chordData.fingers}
                         barre={chordData.barre}
+                        fretCount={5}
+                        strumTrigger={strumTrigger}
                         onStrumString={handleStringClick}
                         showHints={true}
                     />
