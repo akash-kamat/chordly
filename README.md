@@ -3,6 +3,10 @@
 </p>
 
 <h1 align="center">🎸 Chordly</h1>
+<p align="center">
+  Live Link: https://www.chordly.studio
+</p>
+
 
 <p align="center">
   <strong>The open-source, interactive guitar learning platform</strong>
@@ -182,5 +186,5 @@ We love contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 <p align="center">
   <strong>Made with ❤️ for guitar learners everywhere</strong>
   <br />
-  <a href="https://github.com/yourusername/chordly">⭐ Star us on GitHub</a>
+  <a href="https://github.com/akash-kamat/chordly">⭐ Star me on GitHub</a>
 </p>
